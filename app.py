@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain.chat_models import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema import HumanMessage, SystemMessage
 import google.generativeai as genai
 import easyocr
