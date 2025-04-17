@@ -82,8 +82,7 @@ if uploaded_file:
 You are reviewing a business or analytics dashboard.
 
 Here is the extracted text:
-
-"""{extracted_text}"""
+{extracted_text}
 
 Summarize what the dashboard is showing — including KPIs, trends, and important metrics.
 """
