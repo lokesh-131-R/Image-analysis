@@ -10,25 +10,13 @@ import tempfile
 
 
 def analyze_dashboard_image(image_path):
-    """Extracts text and numbers from the dashboard area, detects active filters, and prepares analysis."""
+    """Extracts text and numbers from the full dashboard image and prepares analysis."""
     reader = easyocr.Reader(['en'], gpu=False)
     img = cv2.imread(image_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Detect the dashboard area using edge detection and contour detection
-    #edges = cv2.Canny(gray, 50, 150)
-    #contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Assume the largest rectangular contour is the dashboard
-    dashboard_contour = max(gray, key=cv2.contourArea, default=None)
-    if dashboard_contour is not None:
-        x, y, w, h = cv2.boundingRect(dashboard_contour)
-        dashboard_img = img[y:y+h, x:x+w]
-    else:
-        dashboard_img = img  # Fallback to full image if no contour detected
-
-    # OCR on the detected dashboard area
-    ocr_results = reader.readtext(dashboard_img)
+    # Use full image for OCR
+    ocr_results = reader.readtext(gray)
     extracted_text = [text[1] for text in ocr_results]
     extracted_numbers = [word for text in extracted_text for word in text.split() if word.replace(",", "").replace(".", "").isdigit()]
 
@@ -82,7 +70,8 @@ if uploaded_file:
 You are reviewing a business or analytics dashboard.
 
 Here is the extracted text:
-{extracted_text}
+
+"""{extracted_text}"""
 
 Summarize what the dashboard is showing — including KPIs, trends, and important metrics.
 """
