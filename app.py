@@ -153,19 +153,19 @@ with st.sidebar:
                         FROM DSX_DASHBOARDS_SANDBOX.HUBSPOT_REPORTING.VW_DEALS_LINE_ITEMS_DATA
                     )
             """
-            pdf_path = r"Power_BI_User_Guide_1.pdf"
-            user_guide_text = extract_text_from_pdf(pdf_path)
+            #pdf_path = r"Power_BI_User_Guide_1.pdf"
+            #user_guide_text = extract_text_from_pdf(pdf_path)
 
             # Split text into chunks for better retrieval
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=500, chunk_overlap=50, length_function=len
-            )
-            text_chunks = text_splitter.split_text(user_guide_text)
+            #text_splitter = RecursiveCharacterTextSplitter(
+            #    chunk_size=500, chunk_overlap=50, length_function=len
+            #)
+            #text_chunks = text_splitter.split_text(user_guide_text)
 
             # Create text embeddings
-            embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-            vector_store = FAISS.from_texts(texts=text_chunks, embedding=embedding_model)
-            retriever = vector_store.as_retriever()
+            #embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+            #vector_store = FAISS.from_texts(texts=text_chunks, embedding=embedding_model)
+            #retriever = vector_store.as_retriever()
 
 
             Snowflack_data = pd.read_sql(query, conn)
@@ -197,7 +197,7 @@ with st.sidebar:
 
 
 
-            PDF = RetrievalQA.from_chain_type(llm=llm,chain_type="stuff",retriever=retriever)
+            #PDF = RetrievalQA.from_chain_type(llm=llm,chain_type="stuff",retriever=retriever)
             DAX = create_pandas_dataframe_agent(llm=llm,df = Measure_Table,allow_dangerous_code=True, handle_parsing_errors=True,verbose=True,number_of_head_rows= Measure_Table.shape[0])
             Table = create_pandas_dataframe_agent(llm=llm,df = df_1,allow_dangerous_code=True, handle_parsing_errors=True,verbose=True,number_of_head_rows= df_1.shape[0])
             Excel = create_pandas_dataframe_agent(llm=llm,df = xls_data,allow_dangerous_code=True, handle_parsing_errors=True,verbose=True,number_of_head_rows= xls_data.shape[0])
