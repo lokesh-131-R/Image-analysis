@@ -16,11 +16,11 @@ def analyze_dashboard_image(image_path):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Detect the dashboard area using edge detection and contour detection
-    edges = cv2.Canny(gray, 50, 150)
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    #edges = cv2.Canny(gray, 50, 150)
+    #contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Assume the largest rectangular contour is the dashboard
-    dashboard_contour = max(contours, key=cv2.contourArea, default=None)
+    dashboard_contour = max(gray, key=cv2.contourArea, default=None)
     if dashboard_contour is not None:
         x, y, w, h = cv2.boundingRect(dashboard_contour)
         dashboard_img = img[y:y+h, x:x+w]
