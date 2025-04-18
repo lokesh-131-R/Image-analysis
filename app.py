@@ -66,19 +66,8 @@ if uploaded_file:
             st.text_area("💾 Text from Image", extracted_text, height=200)
 
             st.subheader("📊 Dashboard Summary")
-            prompt = f"""
-You are reviewing a business or analytics dashboard.
-
-Here is the extracted text:
-
-{extracted_text}
-
-Summarize what the dashboard is showing — including KPIs, trends, and important metrics.
-"""
-            response = llm([
-                SystemMessage(content="You are a professional analyst that explains dashboards."),
-                HumanMessage(content=prompt)
-            ])
+            prompt = f"""You are reviewing a business or analytics dashboard.Here is the extracted text:{extracted_text}Summarize what the dashboard is showing — including KPIs, trends, and important metrics."""
+            response = llm.invoke(prompt)
             st.write(response.content)
 
         except Exception as e:
