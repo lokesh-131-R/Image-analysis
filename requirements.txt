@@ -48,7 +48,6 @@ httpcore
 httplib2
 httpx
 httpx-sse
-huggingface-hub
 idna
 imageio
 ipykernel
@@ -109,6 +108,8 @@ pydantic
 pydantic_core
 pydantic-settings
 pydeck
+Pygments
+PyJWT
 pyOpenSSL
 pyparsing
 PyPDF2
