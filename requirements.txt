@@ -54,9 +54,9 @@ jsonpatch
 jsonpointer
 jsonschema
 jsonschema-specifications
-langchain
 langchain-community
-langchain-core
+langchain==0.1.14
+langchain-core==0.1.32
 langchain-experimental
 langchain-google-genai
 langchain-text-splitters
