@@ -110,7 +110,6 @@ pydantic_core
 pydantic-settings
 pydeck
 Pygments
-PyJWT
 pyOpenSSL
 pyparsing
 PyPDF2
