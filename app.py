@@ -6,12 +6,16 @@ import os
 import boto3
 import cv2
 import easyocr
+from langchain.chat_models import ChatOpenAI
+from langchain.embeddings import OpenAIEmbeddings
 from PIL import Image
 from transformers import pipeline
+from langchain.schema import HumanMessage, SystemMessage
 from PyPDF2 import PdfReader
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from fuzzywuzzy import process
 from langchain.schema import AIMessage
+from langchain_community.chat_models import BedrockChat
 from langchain.chains import RetrievalQA
 from langchain.chains.question_answering import load_qa_chain
 from langchain.vectorstores import FAISS
@@ -52,22 +56,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 with st.sidebar:
-    API = st.text_input("Upload the API Key")
-    SNOWFLAKE_USER_input = st.text_input("Snowflake User")
-    SNOWFLAKE_PASSWORD_input = st.text_input("Snowflake Password")
-    # Set your Gemini API Key
-    os.environ["GOOGLE_API_KEY"] = API
+    API = st.text_input("Upload the API Key", type="password")
+    #Secure_Key = st.text_input("Upload the Secure Key")
+    SNOWFLAKE_USER_input = st.text_input("Snowflake User", type="password")
+    SNOWFLAKE_PASSWORD_input = st.text_input("Snowflake Password", type="password")
 
     if API:
-    # Set the API key as an environment variable
-        os.environ["GOOGLE_API_KEY"] = API
+        os.environ["OPENAI_API_KEY"] = API
 
-    # Initialize the LangChain Google Generative AI
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro",  # or "gemini-1.5-pro" if available
-            temperature=0.1,
-            top_p=0.9
-        )
+        llm = ChatOpenAI(model="gpt-4", temperature=0.7)
+    
         if SNOWFLAKE_USER_input and SNOWFLAKE_PASSWORD_input:
         # Snowflake connection details
             SNOWFLAKE_USER = SNOWFLAKE_USER_input
@@ -122,19 +120,19 @@ with st.sidebar:
                         FROM DSX_DASHBOARDS_SANDBOX.HUBSPOT_REPORTING.VW_DEALS_LINE_ITEMS_DATA
                     )
             """
-            #pdf_path = r"Power_BI_User_Guide_1.pdf"
-            #user_guide_text = extract_text_from_pdf(pdf_path)
+            pdf_path = r"Power_BI_User_Guide_1.pdf"
+            user_guide_text = extract_text_from_pdf(pdf_path)
 
             # Split text into chunks for better retrieval
-            #text_splitter = RecursiveCharacterTextSplitter(
-            #    chunk_size=500, chunk_overlap=50, length_function=len
-            #)
-            #text_chunks = text_splitter.split_text(user_guide_text)
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=500, chunk_overlap=50, length_function=len
+            )
+            text_chunks = text_splitter.split_text(user_guide_text)
 
             # Create text embeddings
-            #embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-            #vector_store = FAISS.from_texts(texts=text_chunks, embedding=embedding_model)
-            #retriever = vector_store.as_retriever()
+            embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
+            vector_store = FAISS.from_texts(texts=text_chunks, embedding=embedding_model)
+            retriever = vector_store.as_retriever()
 
 
             Snowflack_data = pd.read_sql(query, conn)
@@ -166,7 +164,7 @@ with st.sidebar:
 
 
 
-            #PDF = RetrievalQA.from_chain_type(llm=llm,chain_type="stuff",retriever=retriever)
+            PDF = RetrievalQA.from_chain_type(llm=llm,chain_type="stuff",retriever=retriever)
             DAX = create_pandas_dataframe_agent(llm=llm,df = Measure_Table,allow_dangerous_code=True, handle_parsing_errors=True,verbose=True,number_of_head_rows= Measure_Table.shape[0])
             Table = create_pandas_dataframe_agent(llm=llm,df = df_1,allow_dangerous_code=True, handle_parsing_errors=True,verbose=True,number_of_head_rows= df_1.shape[0])
             Excel = create_pandas_dataframe_agent(llm=llm,df = xls_data,allow_dangerous_code=True, handle_parsing_errors=True,verbose=True,number_of_head_rows= xls_data.shape[0])
@@ -188,7 +186,7 @@ with st.sidebar:
             - `"Give me the calculation for TCV"` → Uses **Dax**
             - `"What does TCV means ?"` → Uses **Dictionary**
             - `"Give the table names present"` → Uses **Table**
-            - `"Can you guide me in how to use the sliced?"` → Uses **Guide**
+            - `"Analyze the data and identify all possible reasons why the TCV in February 2024 is higher compared to other months. Consider factors such as team performance, deal size, client activity, or any noticeable trends or anomalies."` → Uses **Data**
             """)
 
 
@@ -355,7 +353,14 @@ if image_path:
                         f"Detected text: {'; '.join(extracted_text)}. "
                         f"Numbers: {', '.join(extracted_numbers)}. ")
                         #f"Active filter: {active_filter}.")
+        
+        system_message = SystemMessage(content="You are a skilled Image analyst.")
+
+# Define the user's prompt
+        user_message = HumanMessage(content=
+        f"""You're analyzing a dashboard based on the visual input. Summarize the dashboard content in a detailed yet user-friendly way, using only the information visible in the dashboard. Avoid technical or backend details—assume the user can only see what's presented on the screen.
+Here         is the extracted text from the dashboard: {description}""")
 
         st.write("Analyzing the image...")
-        st.write(llm.invoke(f"""Your lookng into the image analysis of the dashboard based on the input summaries the dashboard and give me detailed summary of it make sure give only the information as the use will not know the whats going on the backend so use the generric so that use can only see the dashboard information
-                            this is the text : {description}""").content)
+        response = llm.invoke([system_message, user_message])
+        st.write(response.content)
